@@ -9,7 +9,7 @@ OBJCOPY = $(ARCH)-objcopy
 
 # Board
 SBI = rustsbi
-BOOTLOADER = ../bootloader/fw_jump_qemu.bin
+BOOTLOADER = ../bootloader/fw_jump_nezha.bin
 
 # Directories
 WORK_DIR = $(shell pwd)
@@ -56,7 +56,7 @@ KERNEL_BIN = $(BUILD_DIR)/$(KERNEL_NAME).bin
 KERNEL_DISASM = $(BUILD_DIR)/$(KERNEL_NAME).txt
 
 # Kernel entry
-KERNEL_ENTRY_PA = 0x80200000
+KERNEL_ENTRY_PA = 0x40200000
 
 # Kernel log level
 LOG_LEVELS = ERROR WARN INFO DEBUG TRACE
@@ -98,26 +98,10 @@ $(DST_DIR)/%.o: %.S
 	$(AS) $(ASFLAGS) -c -o $@ $(realpath $<)
 
 run: build
-	@qemu-system-riscv64 \
-		-machine virt \
-		-nographic \
-		-bios $(BOOTLOADER) \
-		-device loader,file=$(KERNEL_BIN),addr=$(KERNEL_ENTRY_PA) \
-		-drive file=$(FS_IMG),if=none,format=raw,id=x0 \
-        -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
-
-debug-run:
-	@qemu-system-riscv64 \
-		-machine virt \
-		-nographic \
-		-bios $(BOOTLOADER) \
-		-device loader,file=$(KERNEL_BIN),addr=$(KERNEL_ENTRY_PA) \
-		-drive file=$(FS_IMG),if=none,format=raw,id=x0 \
-        -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0 \
-		-s -S
-
-debug-gdb:
-	$(GDB) $(KERNEL_ELF) -ex 'target remote localhost:1234'
+	xfel ddr d1
+	xfel write 0x40000000 $(BOOTLOADER)
+	xfel write $(KERNEL_ENTRY_PA) $(KERNEL_BIN)
+	xfel exec 0x40000000
 
 clean:
 	-rm -rf $(BUILD_DIR)

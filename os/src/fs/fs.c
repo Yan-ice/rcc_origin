@@ -8,15 +8,22 @@ int64_t stdin_read(char *buf, uint64_t len) {
   assert(len == 1);
 
   // busy loop
-  uint64_t c;
+  int c;
   while (1) {
     c = console_getchar();
+    
+    //Yan_ice: reject -1.
+    if (c == -1){
+      continue;
+    }
+
     if (c == 0) {
       task_suspend_current_and_run_next();
       continue;
     } else {
       break;
     }
+    
   }
 
   uint8_t ch = (uint8_t)c;

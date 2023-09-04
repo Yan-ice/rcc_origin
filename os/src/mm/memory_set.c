@@ -152,7 +152,7 @@ static void memory_set_new_kernel() {
   info(".rodata    [0x%llx, 0x%llx)\n", &srodata, &erodata);
   info(".data      [0x%llx, 0x%llx)\n", &sdata, &edata);
   info("boot_stack [0x%llx, 0x%llx)\n", &sbss_with_stack, &ebss);
-
+  info("frame      [0x%llx, 0x%llx)\n", &ekernel, MEMORY_END);
   MapArea map_area;
 
   info("mapping .text section\n");
@@ -306,12 +306,15 @@ void memory_set_from_existed_user(MemorySet *memory_set,
 
 static void memory_set_activate(MemorySet *memory_set) {
   uint64_t satp = page_table_token(&memory_set->page_table);
+  info("Activating pagetable: %llx.\n", satp);
   w_satp(satp);
   sfence_vma();
+  info("Activate pagetable success.\n", satp);
 }
 
 void memory_set_kernel_init() {
   memory_set_new_kernel();
+
   memory_set_activate(&KERNEL_SPACE);
 }
 

@@ -37,6 +37,12 @@
 #define FD_STDOUT 1
 #define FD_STDERR 2
 
+#define stdin 0
+#define stdout 1
+#define stderr 2
+
+#define EOF -1
+
 #include <stdarg.h>
 #include <stddef.h>
 
@@ -67,6 +73,13 @@ extern void _putchar(char character);
  */
 #define printf printf_
 int printf_(const char *format, ...);
+
+/**
+ * fprintf implementation 
+ * by Yan_ice
+ */
+#define fprintf fprintf_
+int fprintf_(int fd, const char *format, ...);
 
 /**
  * Tiny sprintf implementation

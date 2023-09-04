@@ -51,6 +51,10 @@ void inode_list_apps() {
   info("**************/\n");
 }
 
+int fs_status() {
+  return 0;
+}
+
 OSInode *inode_open_file(char *name, uint32_t flags) {
   OSInode *osinode = bd_malloc(sizeof(OSInode));
   osinode->ref = 1;

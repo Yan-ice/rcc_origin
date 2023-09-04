@@ -70,14 +70,14 @@ static struct disk {
   struct virtio_blk_req ops[NUM];
 } __attribute__((aligned(PAGE_SIZE))) disk;
 
-void virtio_disk_init() {
+int virtio_disk_init() {
   uint32_t status = 0;
 
   if (*R(VIRTIO_MMIO_MAGIC_VALUE) != 0x74726976 ||
       *R(VIRTIO_MMIO_VERSION) != 1 || *R(VIRTIO_MMIO_DEVICE_ID) != 2 ||
       *R(VIRTIO_MMIO_VENDOR_ID) != 0x554d4551) {
     warn("could not find virtio disk\n");
-    return;
+    return -1;
   }
 
   status |= VIRTIO_CONFIG_S_ACKNOWLEDGE;
@@ -132,6 +132,7 @@ void virtio_disk_init() {
     disk.free[i] = 1;
 
   // plic.c and trap.c arrange for interrupts from VIRTIO0_IRQ.
+  return 0;
 }
 
 // find a free descriptor, mark it non-free, return its index.

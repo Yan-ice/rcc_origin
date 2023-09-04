@@ -4,7 +4,7 @@
 #include "efs.h"
 
 // virtio_disk.c
-void virtio_disk_init();
+int virtio_disk_init();
 void virtio_disk_rw(BlockCache *, int);
 void virtio_disk_intr();
 

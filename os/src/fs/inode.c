@@ -24,9 +24,15 @@ uint64_t inode_read_all(OSInode *osinode, uint8_t *buf) {
 
 static Inode ROOT_INODE;
 static EasyFileSystem EFS;
+static int status = 0;
 
 void inode_root_init() {
   BlockDevice *device = virtio_block_device_init();
+  if(device == 0){
+    status = 0;
+    return;
+  }
+  status = 1;
   block_cache_manager_init();
   efs_open(&EFS, device);
   efs_root_inode(&ROOT_INODE, &EFS);
@@ -52,7 +58,7 @@ void inode_list_apps() {
 }
 
 int fs_status() {
-  return 0;
+  return status;
 }
 
 OSInode *inode_open_file(char *name, uint32_t flags) {

@@ -95,10 +95,10 @@ int64_t sys_pipe(uint64_t *pipe) {
   File *pipe_write = task->fd_table[write_fd];
   pipe_make(pipe_read, pipe_write);
 
-  copy_byte_buffer(token, (uint8_t *)&read_fd, (uint8_t *)(&pipe[0]),
-                   sizeof(uint64_t), TO_USER);
-  copy_byte_buffer(token, (uint8_t *)&write_fd, (uint8_t *)(&pipe[1]),
-                   sizeof(uint64_t), TO_USER);
+  copy_byte_buffer(token, (uint8_t *)&read_fd, (uint8_t *)(pipe),
+                   sizeof(uint8_t), TO_USER);
+  copy_byte_buffer(token, (uint8_t *)&write_fd, (uint8_t *)((uint32_t *)pipe + 1),
+                   sizeof(uint8_t), TO_USER);
   return 0;
 }
 
@@ -219,17 +219,25 @@ int64_t sys_exec(char *path) {
   static uint8_t data[MAX_APP_SIZE];
   size_t size;
   TaskControlBlock *task;
-  OSInode *inode = inode_open_file(app_name, O_RDONLY);
 
-  if (inode) {
-    task = processor_current_task();
-    task->elf_inode = inode;
-    size = inode_read_all(task->elf_inode, data);
-    task_control_block_exec(task, data, size);
-    return 0;
+  if (fs_status()) {
+    OSInode *inode = inode_open_file(app_name, O_RDONLY);
+    if(inode){
+      task = processor_current_task();
+      task->elf_inode = inode;
+      size = inode_read_all(task->elf_inode, data);
+      
+    }else{
+      return -1;
+    }
   } else {
-    return -1;
+    task = processor_current_task();
+    //task->elf_inode = NULL;
+    size = mem_load_pgms(app_name, data);
+    // info("mem over\n");
   }
+  task_control_block_exec(task, data, size);
+  return 0;
 }
 
 int64_t sys_mmap(uint64_t start, uint64_t len, uint64_t prot) {
@@ -347,4 +355,48 @@ int64_t sys_mailwrite(int64_t pid, char *buf, uint64_t len) {
   info("write mail to %lld, len = %lld\n", task->mailbox.write_mails, len);
   task->mailbox.write_mails++;
   return len;
+}
+
+
+int64_t sys_sbrk(uint64_t grow_size, uint64_t is_shrink){
+  // // info("[syscall] sbrk\n");
+  // TaskControlBlock *temp = processor_current_task();
+  // return grow_proc(temp, grow_size);
+  return 0;
+}
+
+int64_t sys_brk(uint64_t brk_address) {
+  // // info("[syscall] brk, input arguement is %llx\n", brk_address);
+  //   uint64_t addr_new = 0;
+  //   if (brk_address == 0) {
+  //       addr_new = sys_sbrk(0, 0);
+  //   }
+  //   else{
+  //       TaskControlBlock *temp = processor_current_task();
+  //       uint64_t former_addr = grow_proc(temp, 0);
+  //       uint64_t grow_size = (brk_address - former_addr);
+  //       addr_new = grow_proc(temp, grow_size);
+  //   }
+
+  // // PhysAddr* pa;
+  // // nkapi_translate_va(processor_current_task()->pid, addr_new, pa);
+  // // info("pa is %lx\n", pa);    
+  return 0;
+}
+
+int64_t sys_gettid() {
+  // info("[syscall] get tid\n");
+  // return processor_current_task()->pid;
+  return 0;
+}
+
+int64_t sys_set_tid_address(uint64_t tid){
+  // info("[syscall] set tid address\n");
+  // processor_current_task()->address.clear_child_tid = tid;
+  // return sys_gettid();
+  return 0;
+}
+
+int64_t umask(int64_t num){
+  return 0;
 }

@@ -1,5 +1,5 @@
 # Toolchain
-ARCH = riscv64-unknown-elf
+ARCH = riscv64-linux-gnu
 CC = $(ARCH)-gcc
 AS = $(ARCH)-gcc
 LD = $(ARCH)-ld

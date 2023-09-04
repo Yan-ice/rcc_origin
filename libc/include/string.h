@@ -1,17 +1,39 @@
-#ifndef _STRING_H_
-#define _STRING_H_
+#ifndef STRING_H
+#define STRING_H
 
-#include <stddef.h>
+#ifndef _YVALS
+#define _YVALS
+#include "yvals.h"
+#endif
 
-void *memset(void *s, int c, size_t n);
-void *memcpy(void *dst, const void *src, size_t n);
-void *memmove(void *dst, const void *src, size_t n);
-int memcmp(const void *s1, const void *s2, size_t n);
-size_t strlen(const char *s);
-char *strcat(char *dst, const char *src);
-char *strcpy(char *dst, const char *src);
-char *strncpy(char *dst, const char *src, size_t n);
-int strcmp(const char *s1, const char *s2);
-int strncmp(const char *s1, const char *s2, size_t n);
+#define NULL _NULL
+typedef _Sizet size_t;
 
-#endif // _STRING_H_
+void *memchr(const void *, int, size_t);
+int   memcmp(const void *, const void *, size_t);
+void *memcpy(void *, const void *, size_t);
+void *memmove(void *, const void *, size_t);
+void *memset(void *, int, size_t);
+
+char   *strcat (char *, const char *);
+char   *strncat(char *, const char *, size_t);
+char   *strchr (const char *, int);
+int     strcmp (const char *, const char *);
+int     strncmp(const char *, const char *, size_t);
+size_t  strlen (const char *);
+int     strcoll(const char *, const char *);
+char   *strcpy (char *, const char *);
+char   *strncpy(char *, const char *, size_t);
+char   *strpbrk(const char *, const char *);
+char   *strrchr(const char *, int);
+size_t  strspn (const char *, const char *);
+size_t  strcspn(const char *, const char *);
+char   *strstr (const char *, const char *);
+char   *strtok (char *, const char *);
+size_t  strxfrm(char *, const char *, size_t);
+
+char *_Strerror(int, char *);
+
+#define sterror(errcode) _Strerror(errcode, NULL)
+
+#endif

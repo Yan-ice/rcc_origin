@@ -10,11 +10,27 @@ void task_init() {
   task_manager_init();
 
   static uint8_t initproc_elf[MAX_APP_SIZE];
-  INITPROC.elf_inode = inode_open_file("initproc", O_RDONLY);
-  if (!INITPROC.elf_inode) {
-    panic("Fail to create initproc\n");
+  uint64_t initproc_elf_size = 0;
+  
+  if(fs_status() == 1){
+    info("loading initproc from fs\n");
+    //load elf from file system.
+    INITPROC.elf_inode = inode_open_file("initproc", O_RDONLY);
+    if (!INITPROC.elf_inode) {
+      panic("Fail to create initproc\n");
+    }
+    initproc_elf_size = inode_read_all(INITPROC.elf_inode, initproc_elf);
+  
+  }else{
+    info("loading initproc from memory\n");
+    //TODO: load elf from memory here.
+    initproc_elf_size = mem_load_pgms("initproc", initproc_elf);
+    if(initproc_elf_size == 0){
+      panic("Fail to load initproc from mem\n");
+    }
   }
-  uint64_t initproc_elf_size = inode_read_all(INITPROC.elf_inode, initproc_elf);
+  
+  // panic("unreachable task init\n");
   task_control_block_new(&INITPROC, initproc_elf, initproc_elf_size);
   task_manager_add_task(&INITPROC);
 }

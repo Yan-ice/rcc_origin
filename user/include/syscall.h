@@ -14,6 +14,11 @@
 #define SYSCALL_SET_PRIORITY 140
 #define SYSCALL_GET_TIME 169
 #define SYSCALL_GETPID 172
+#define SYSCALL_GETUID 174
+#define SYSCALL_GETEUID 175
+#define SYSCALL_GETGID 176
+#define SYSCALL_GETEGID 177
+#define SYSCALL_BRK 214
 #define SYSCALL_MUNMAP 215
 #define SYSCALL_FORK 220
 #define SYSCALL_EXEC 221
@@ -44,5 +49,6 @@ int64_t waitpid(int64_t pid, int *exit_code);
 int64_t spawn(char *path);
 int64_t mailread(char *buf, uint64_t len);
 int64_t mailwrite(int64_t pid, char *buf, uint64_t len);
+int64_t getuid();
 
 #endif // _SYSCALL_H_

@@ -8,7 +8,7 @@
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
-#define PIPE_SIZE 256
+#define PIPE_SIZE 512
 #define MAX_MAIL_NUM 16
 #define MAIL_SIZE 256
 #define FS_BUFFER_SIZE 512

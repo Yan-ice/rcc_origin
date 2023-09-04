@@ -2,7 +2,7 @@
     .section .data
     .global _app_num
 _app_num:
-    .quad 10
+    .quad 12
 
     .global _app_datas
 _app_datas:
@@ -16,6 +16,8 @@ _app_datas:
     .quad app_7
     .quad app_8
     .quad app_9
+    .quad app_10
+    .quad app_11
     .quad app_end
 
     .global _app_names
@@ -30,6 +32,8 @@ _app_names:
     .string "long"
     .string "double"
     .string "hanoi"
+    .string "float"
+    .string "looper"
 
 
     .global app_0
@@ -71,6 +75,14 @@ app_8:
     .global app_9
 app_9:
     .incbin "../user/build/hanoi.elf"    
+
+    .global app_10
+app_10:
+    .incbin "../user/build/float.elf"    
+
+    .global app_11
+app_11:
+    .incbin "../user/build/looper.elf"  
 
     .global app_end
 app_end:

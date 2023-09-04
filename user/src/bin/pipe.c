@@ -42,9 +42,7 @@ char	*argv[];
 	int	pvec[2], duration;
 
 	// duration = atoi(argv[1]);
-
 	pipe(pvec);
-
 	// wake_me(duration, report);
 	iter = 0;
 

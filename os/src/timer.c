@@ -1,4 +1,6 @@
 #include <stdint.h>
+#include <stdio.h>
+#include "log.h"
 
 #include "config.h"
 #include "sbi.h"

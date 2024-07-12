@@ -15,7 +15,7 @@
 #define TASK_STATUS_ZOMBIE 2
 #define TASK_STATUS_EXITED 3
 
-#define MAX_TASK_NUM 64
+#define MAX_TASK_NUM 1024 //64 -> 1024 to let looper work
 #define MAX_FILE_NUM 16
 
 #define BIG_STRIDE 100000

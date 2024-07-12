@@ -35,6 +35,7 @@ int64_t sys_dup(uint64_t fd) {
 }
 
 int64_t sys_open(char *path, uint32_t flags) {
+  //info("[sys_open]\n");
   TaskControlBlock *task = processor_current_task();
 
   char file_name[NAME_LENGTH_LIMIT + 1];
@@ -147,8 +148,8 @@ int64_t sys_write(uint64_t fd, char *buf, uint64_t len) {
 }
 
 int64_t sys_exit(int exit_code) {
-  info("Application (pid = %lld) exited with code %d\n",
-       processor_current_task()->pid, exit_code);
+  //info("Application (pid = %lld) exited with code %d\n",
+  //     processor_current_task()->pid, exit_code);
   debug("Remaining physical pages %lld\n", frame_remaining_pages());
   task_exit_current_and_run_next(exit_code);
   panic("Unreachable in sys_exit!\n");
@@ -189,6 +190,7 @@ int64_t sys_munmap(uint64_t start, uint64_t len) {
 }
 
 int64_t sys_fork() {
+  //info("[sys_fork]\n");
   if (task_manager_almost_full()) {
     return -1;
   }
@@ -212,6 +214,7 @@ int64_t sys_fork() {
 }
 
 int64_t sys_exec(char *path) {
+  //info("[sys_exec]\n");
   char app_name[NAME_LENGTH_LIMIT + 1];
   copy_byte_buffer(processor_current_user_token(), (uint8_t *)app_name,
                    (uint8_t *)path, NAME_LENGTH_LIMIT + 1, FROM_USER);
@@ -219,25 +222,36 @@ int64_t sys_exec(char *path) {
   static uint8_t data[MAX_APP_SIZE];
   size_t size;
   TaskControlBlock *task;
-  OSInode *inode = inode_open_file(app_name, O_RDONLY);
 
-  if (inode) {
-    task = processor_current_task();
-    task->elf_inode = inode;
-    size = inode_read_all(task->elf_inode, data);
-    task_control_block_exec(task, data, size);
-    return 0;
+  if (fs_status()) {
+    OSInode *inode = inode_open_file(app_name, O_RDONLY);
+    if(inode){
+      task = processor_current_task();
+      task->elf_inode = inode;
+      size = inode_read_all(task->elf_inode, data);
+      
+    }else{
+      return -1;
+    }
   } else {
-    return -1;
+    task = processor_current_task();
+    //task->elf_inode = NULL;
+    size = mem_load_pgms(app_name, data);
+    // info("mem over\n");
   }
+  //info("[syscall] exec go\n");
+  task_control_block_exec(task, data, size);
+  return 0;
 }
 
 int64_t sys_mmap(uint64_t start, uint64_t len, uint64_t prot) {
+  //info("[sys_mmap]\n");
   MemorySet *memory_set = task_current_memory_set();
   return memory_set_mmap(memory_set, start, len, prot);
 }
 
 int64_t sys_waitpid(int64_t pid, int *exit_code_ptr) {
+  //info("[sys_waitpid]\n");
   TaskControlBlock *task = processor_current_task();
 
   // find a child process

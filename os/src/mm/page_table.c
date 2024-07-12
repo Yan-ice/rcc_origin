@@ -78,7 +78,8 @@ void page_table_map(PageTable *pt, VirtPageNum vpn, PhysPageNum ppn,
   if (pte_is_valid(*pte)) {
     panic("VPN 0x%llx is mapped before mapping.\n", vpn);
   }
-  *pte = pte_new(ppn, flags | PTE_V);
+  *pte = pte_new(ppn, flags | PTE_V | PTE_A | PTE_D);
+  //Yan_ice: nezha need A and D, I dont know why.
 }
 
 void page_table_unmap(PageTable *pt, VirtPageNum vpn) {

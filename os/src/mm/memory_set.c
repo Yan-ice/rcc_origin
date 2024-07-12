@@ -79,6 +79,7 @@ uint64_t memory_set_token(MemorySet *memory_set) {
 
 static void memory_set_push(MemorySet *memory_set, MapArea *map_area,
                             uint8_t *data, uint64_t len) {
+  //info("mapping: %llx %llx\n", map_area->vpn_range.l, map_area->vpn_range.r);
   map_area_map(map_area, &memory_set->page_table);
   if (data && len >= 0) {
     map_area_copy_data(map_area, &memory_set->page_table, data, len);
@@ -214,7 +215,6 @@ void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
 
   // map trampoline
   memory_set_map_trampoline(memory_set);
-
   // map progam headers of elf, with U flag
   t_elf elf;
   int elf_load_ret = elf_load(elf_data, elf_size, &elf);
@@ -259,6 +259,7 @@ void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
   VirtAddr max_end_va = pn2addr(max_end_vpn);
   VirtAddr user_stack_bottom = max_end_va;
   // guard page
+
   user_stack_bottom += PAGE_SIZE;
   VirtAddr user_stack_top = user_stack_bottom + USER_STACK_SIZE;
   map_area.vpn_range.l = page_floor(user_stack_bottom);
@@ -266,10 +267,10 @@ void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
   map_area.map_type = MAP_FRAMED;
   map_area.map_perm = MAP_PERM_R | MAP_PERM_W | MAP_PERM_U;
   memory_set_push(memory_set, &map_area, NULL, 0);
-
+  
   // map TrapContext
   map_area.vpn_range.l = page_floor(TRAP_CONTEXT);
-  map_area.vpn_range.r = page_ceil(TRAMPOLINE);
+  map_area.vpn_range.r = page_ceil(TRAP_CONTEXT)+1;
   map_area.map_type = MAP_FRAMED;
   map_area.map_perm = MAP_PERM_R | MAP_PERM_W;
   memory_set_push(memory_set, &map_area, NULL, 0);
@@ -306,13 +307,16 @@ void memory_set_from_existed_user(MemorySet *memory_set,
 
 static void memory_set_activate(MemorySet *memory_set) {
   uint64_t satp = page_table_token(&memory_set->page_table);
+  info("prepare to write satp: %llx \n", satp);
   w_satp(satp);
   sfence_vma();
 }
 
 void memory_set_kernel_init() {
   memory_set_new_kernel();
+  info("Kernel pagetable init success. \n");
   memory_set_activate(&KERNEL_SPACE);
+  info("Kernel pagetable activated. \n");
 }
 
 PageTableEntry *memory_set_translate(MemorySet *memory_set, VirtPageNum vpn) {

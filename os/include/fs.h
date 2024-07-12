@@ -55,7 +55,7 @@ int64_t pipe_write(Pipe *pipe, char *buf, uint64_t len);
 
 // inode.c
 uint64_t inode_read_all(OSInode *osinode, uint8_t *buf);
-void inode_root_init();
+int inode_root_init();
 void inode_list_apps();
 OSInode *inode_open_file(char *name, uint32_t flags);
 int64_t inode_close_file(OSInode *osinode);

@@ -22,15 +22,36 @@ uint64_t inode_read_all(OSInode *osinode, uint8_t *buf) {
   return ret;
 }
 
+static int HAS_FS = 0;
 static Inode ROOT_INODE;
 static EasyFileSystem EFS;
 
-void inode_root_init() {
+int inode_root_init() {
+
+  info("inode_root_would not init, use mem_pgms instead.\n");
+  //TODO. currently NO inode.
+  HAS_FS = 0;
+  return 0;
+
+  info("inode_root_init\n");
   BlockDevice *device = virtio_block_device_init();
+  if(device==NULL){
+    HAS_FS = 0;
+    return 0;
+  }
+  info("inode_root_init 2\n");
   block_cache_manager_init();
   efs_open(&EFS, device);
+  info("inode_root_init 4\n");
   efs_root_inode(&ROOT_INODE, &EFS);
   inode_list_apps();
+  info("apps init\n");
+  HAS_FS = 1;
+  return 1;
+}
+
+int fs_status() {
+  return HAS_FS;
 }
 
 void inode_list_apps() {
@@ -73,6 +94,7 @@ OSInode *inode_open_file(char *name, uint32_t flags) {
       }
       return osinode;
     }
+    info("not found\n");
   }
   bd_free(osinode);
   return NULL;
@@ -109,7 +131,7 @@ int64_t inode_write(OSInode *osinode, char *buf, uint64_t len) {
                    len, FROM_USER);
   write_size = inode_write_at(&osinode->inode, osinode->offset,
                               (uint8_t *)FS_BUFFER, len);
-  assert(write_size == len);
+
   osinode->offset += write_size;
   return write_size;
 }

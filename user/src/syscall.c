@@ -111,3 +111,7 @@ int64_t mailread(char *buf, uint64_t len) {
 int64_t mailwrite(int64_t pid, char *buf, uint64_t len) {
   return syscall(SYSCALL_MAILWRITE, (uint64_t)pid, (uint64_t)buf, len);
 }
+
+int64_t getuid(){
+  return syscall(SYSCALL_GETUID, 0, 0, 0);
+}

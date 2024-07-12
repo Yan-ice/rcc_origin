@@ -19,6 +19,12 @@ LIB_BUILD_DIR = $(LIB_DIR)/build
 LIB_NAME = c
 LIB = $(LIB_BUILD_DIR)/lib$(LIB_NAME).a
 
+# Library (libc)
+LIBMMK_DIR = $(realpath ../libmmk/user)
+LIBMMK_BUILD_DIR = $(LIBMMK_DIR)/../build
+LIBMMK_NAME = mmk_u
+LIBMMK = $(LIBMMK_BUILD_DIR)/lib$(LIBMMK_NAME).a
+
 # Build target 1: user_lib
 USER_LIB_SRC = $(wildcard src/*.c src/*.S)
 USER_LIB_OBJ = $(addprefix $(DST_DIR)/, $(addsuffix .o, $(basename $(USER_LIB_SRC))))
@@ -39,13 +45,13 @@ EFS_FUSE = efs-fuse
 EFS_FUSE_DIR = $(realpath ../efs-fuse)
 
 # Flags
-INCFLAGS = -I$(WORK_DIR)/include -I$(LIB_DIR)/include
+INCFLAGS = -I$(WORK_DIR)/include -I$(LIB_DIR)/include -I$(LIBMMK_DIR)/include
 COMMON_FLAGS = -fno-pic -mcmodel=medany
 CFLAGS = $(COMMON_FLAGS) -static -O2 -MMD -Wall -ggdb $(INCFLAGS) \
          -fno-builtin -fno-stack-protector -ffreestanding -Wno-main
 ASFLAGS = $(COMMON_FLAGS) -O0 -MMD $(INCFLAGS)
 LDFLAGS = -melf64lriscv -T $(APPS_LINKER_SCRIPT) \
-				  -L$(LIB_BUILD_DIR) -l$(LIB_NAME) -L$(BUILD_DIR) -l$(USER_LIB_NAME) -g
+				  -L$(LIB_BUILD_DIR) -l$(LIB_NAME) -L$(LIBMMK_BUILD_DIR) -l$(LIBMMK_NAME) -L$(BUILD_DIR) -l$(USER_LIB_NAME) -g
 
 default: $(FS_IMG)
 
@@ -56,12 +62,13 @@ $(FS_IMG): build-lib $(USER_LIB) $(APPS_ELF) $(APPS_OBJ)
 
 build-lib:
 	cd $(LIB_DIR) && $(MAKE)
+	cd $(LIBMMK_DIR)/.. && make
 
 $(USER_LIB): $(USER_LIB_OBJ)
 	$(AR) cr $@ $^
 
 $(BUILD_DIR)/%.elf: $(DST_DIR)/$(APPS_DIR)/%.o
-	$(LD) $(LDFLAGS) $^ $(LIB) -o $@
+	$(LD) $(LDFLAGS) $^ $(LIB) -o $@ ../libmmk/user/src/mmk_syscall.o ../libmmk/user/src/pkcs11.o
 	$(OBJCOPY) $@ --strip-all -O binary $(basename $@).bin
 	$(OBJDUMP) $@ -d > $(basename $@).txt
 

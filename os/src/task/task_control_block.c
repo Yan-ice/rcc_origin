@@ -3,6 +3,7 @@
 #include "config.h"
 #include "string.h"
 #include "task.h"
+#include "log.h"
 
 TrapContext *task_control_block_get_trap_cx(TaskControlBlock *s) {
   return (TrapContext *)pn2addr(s->trap_cx_ppn);
@@ -59,6 +60,7 @@ void task_control_block_new(TaskControlBlock *s, uint8_t *elf_data,
   uint64_t entry_point;
   memory_set_from_elf(&s->memory_set, elf_data, elf_size, &user_sp,
                       &entry_point);
+  info("memory_set_from_elf finish.\n");
   s->trap_cx_ppn = (PhysPageNum)pte_ppn(*memory_set_translate(
       &s->memory_set, (VirtPageNum)addr2pn((VirtAddr)TRAP_CONTEXT)));
 
